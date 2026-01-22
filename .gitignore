@@ -13,5 +13,4 @@ crash.log
 *.tfvars.json
 
 # Sensitive files
-variables.tf
 api-key.txt
