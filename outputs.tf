@@ -9,5 +9,5 @@ output "backend_load_balancer_ip" {
 
 output "frontend_url" {
   description = "URL to access the application"
-  value       = "https://${upcloud_managed_object_storage_bucket.frontend_bucket.name}.${var.region}.upcloudobjects.com/index.html"
+  value       = "https://${upcloud_managed_object_storage_bucket.frontend_bucket.name}.${var.object_storage_region}.upcloudobjects.com/index.html"
 }

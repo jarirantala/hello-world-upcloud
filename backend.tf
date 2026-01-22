@@ -11,6 +11,7 @@ resource "kubernetes_config_map" "app_code" {
 
   depends_on = [
     data.upcloud_kubernetes_cluster.main,
+    time_sleep.wait_for_k8s
   ]
 }
 

@@ -24,7 +24,6 @@ resource "time_sleep" "wait_for_k8s" {
 
 data "upcloud_kubernetes_cluster" "main" {
   id = upcloud_kubernetes_cluster.main.id
-  depends_on = [time_sleep.wait_for_k8s]
 }
 
 # Configure the Kubernetes provider to use the cluster credentials
