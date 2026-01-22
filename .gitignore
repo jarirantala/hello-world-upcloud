@@ -1,0 +1,17 @@
+# Local .terraform directories
+.terraform/
+
+# .tfstate files
+*.tfstate
+*.tfstate.backup
+
+# Crash log files
+crash.log
+
+# Exclude all .tfvars files
+*.tfvars
+*.tfvars.json
+
+# Sensitive files
+variables.tf
+api-key.txt
