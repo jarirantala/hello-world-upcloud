@@ -9,7 +9,14 @@ resource "upcloud_managed_object_storage" "frontend_store" {
   name   = "frontend-store-${var.environment}-${random_string.suffix.result}"
   region = var.object_storage_region
   configured_status = "started"
+
+  network {
+    name   = "public"
+    type   = "public"
+    family = "IPv4"
+  }
 }
+
 
 # 2. Create a Bucket
 resource "upcloud_managed_object_storage_bucket" "frontend_bucket" {
@@ -53,11 +60,14 @@ resource "upcloud_managed_object_storage_user_policy" "uploader_policy_attach" {
   name         = upcloud_managed_object_storage_policy.uploader_policy.name
 }
 
-# 4. Wait for Policy Attachment
-# Ensure permissions are propagated before attempting upload
-resource "time_sleep" "wait_for_policy" {
-  create_duration = "15s"
-  depends_on      = [upcloud_managed_object_storage_user_policy.uploader_policy_attach]
+# 4. Wait for Policy Attachment and Service Readiness
+# UpCloud Managed Object Storage can take a few minutes to fully propagate DNS.
+resource "time_sleep" "wait_for_storage" {
+  create_duration = "120s"
+  depends_on      = [
+    upcloud_managed_object_storage_user_policy.uploader_policy_attach,
+    upcloud_managed_object_storage_bucket.frontend_bucket
+  ]
 }
 
 # 4. Generate index.html with the correct Backend IP
@@ -83,23 +93,32 @@ resource "null_resource" "upload_frontend" {
       export AWS_REQUEST_CHECKSUM_CALCULATION="when_required"
       export AWS_RESPONSE_CHECKSUM_VALIDATION="when_required"
       
-      # Create temporary config to disable payload signing (fixes XAmzContentSHA256Mismatch)
+      # Get the correct service endpoint with a robust fallback
+      # Gen2 endpoints are usually [service-name].upcloudobjects.com
+      ENDPOINT="${element(concat([for e in upcloud_managed_object_storage.frontend_store.endpoint : e.domain_name], ["${upcloud_managed_object_storage.frontend_store.name}.upcloudobjects.com"]), 0)}"
+      
+      # Create temporary config to disable payload signing and force virtual addressing
       export AWS_CONFIG_FILE=$(mktemp)
       echo "[default]" > "$AWS_CONFIG_FILE"
       echo "s3 =" >> "$AWS_CONFIG_FILE"
       echo "    payload_signing_enabled = false" >> "$AWS_CONFIG_FILE"
+      echo "    addressing_style = path" >> "$AWS_CONFIG_FILE"
+
+      echo "Uploading to endpoint: $ENDPOINT"
 
       if aws s3 cp "${local_file.index_html.filename}" \
         "s3://${upcloud_managed_object_storage_bucket.frontend_bucket.name}/index.html" \
-        --endpoint-url "https://${try(one(upcloud_managed_object_storage.frontend_store.endpoint).domain_name, "${var.object_storage_region}.upcloudobjects.com")}" \
+        --endpoint-url "https://$ENDPOINT" \
         --acl public-read \
         --content-type text/html; then
         rm -f "$AWS_CONFIG_FILE"
         echo "----------------------------------------------------------------"
         echo "Upload Complete! Access your application via HTTP here:"
-        echo "http://${try(one(upcloud_managed_object_storage.frontend_store.endpoint).domain_name, "${var.object_storage_region}.upcloudobjects.com")}/${upcloud_managed_object_storage_bucket.frontend_bucket.name}/index.html"
+        echo "http://$ENDPOINT/${upcloud_managed_object_storage_bucket.frontend_bucket.name}/index.html"
         echo "----------------------------------------------------------------"
       else
+        echo "ERROR: Upload failed. Base Hostname: $ENDPOINT"
+        echo "Check if this URL is reachable: https://$ENDPOINT"
         rm -f "$AWS_CONFIG_FILE"
         exit 1
       fi
@@ -107,6 +126,6 @@ resource "null_resource" "upload_frontend" {
   }
 
   depends_on = [
-    time_sleep.wait_for_policy
+    time_sleep.wait_for_storage
   ]
 }

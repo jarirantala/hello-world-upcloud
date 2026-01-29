@@ -21,3 +21,20 @@ variable "environment" {
   type        = string
   default     = "dev"
 }
+
+variable "container_image" {
+  description = "Backend container image"
+  type        = string
+  default     = "python:3.9-alpine" # Default to base, but intended to be overridden
+}
+
+variable "github_repo_url" {
+  description = "URL of the GitHub repository (e.g., https://github.com/user/repo)"
+  type        = string
+}
+
+variable "github_token" {
+  description = "GitHub PAT or Runner Registration Token"
+  type        = string
+  sensitive   = true
+}

@@ -24,8 +24,11 @@ resource "kubernetes_deployment" "backend" {
     }
   }
 
+  wait_for_rollout = false
+
   spec {
-    replicas = 2
+    replicas = 1
+    progress_deadline_seconds = 600
 
     selector {
       match_labels = {
@@ -38,18 +41,38 @@ resource "kubernetes_deployment" "backend" {
         labels = {
           app = "hello-world"
         }
+        annotations = {
+          # This forces a rolling restart whenever the code changes
+          "config-hash" = sha256(jsonencode(kubernetes_config_map.app_code.data))
+        }
       }
 
       spec {
         container {
-          image = "python:3.9-alpine"
+          image = var.container_image
           name  = "python-app"
           
-          # Install dependencies at runtime for this demo
-          command = ["/bin/sh", "-c", "pip install flask flask-cors && python /app/app.py"]
+          # Use native Python server - starts instantly with zero dependencies!
+          command = ["python", "/app/app.py"]
 
           port {
             container_port = 5000
+          }
+
+          env {
+            name  = "FRONTEND_URL"
+            value = "http://${element(concat([for e in upcloud_managed_object_storage.frontend_store.endpoint : e.domain_name], ["${upcloud_managed_object_storage.frontend_store.name}.upcloudobjects.com"]), 0)}"
+          }
+
+          resources {
+            requests = {
+              cpu    = "50m"
+              memory = "128Mi"
+            }
+            limits = {
+              cpu    = "200m"
+              memory = "256Mi"
+            }
           }
 
           volume_mount {

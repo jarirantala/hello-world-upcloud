@@ -1,11 +1,11 @@
 # API Specification
 
 ## 1. Endpoint: Get Greeting
-* **URL:** `http://<load-balancer-ip>/hello`
+* **URL:** `http://<load-balancer-ip>/api/hello`
 * **Method:** `GET`
 
 ### Request Headers
-* `Origin`: `https://<bucket-name>.fi-hel2.upcloudobjects.com`
+* `Origin`: `http://<bucket-name>.fi-hel2.upcloudobjects.com`
 
 ### Response Headers (Critical)
 * `Access-Control-Allow-Origin`: `*` (or the specific storage domain)

@@ -17,13 +17,16 @@ resource "upcloud_kubernetes_node_group" "group" {
 }
 
 resource "time_sleep" "wait_for_k8s" {
-  create_duration = "60s"
+  create_duration = "120s"
 
   depends_on = [upcloud_kubernetes_cluster.main]
 }
 
 data "upcloud_kubernetes_cluster" "main" {
   id = upcloud_kubernetes_cluster.main.id
+  
+  # Crucial: Wait for the cluster to be fully ready before fetching credentials
+  depends_on = [time_sleep.wait_for_k8s]
 }
 
 # Configure the Kubernetes provider to use the cluster credentials
