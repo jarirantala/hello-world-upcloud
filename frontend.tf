@@ -95,6 +95,10 @@ resource "null_resource" "upload_frontend" {
         --acl public-read \
         --content-type text/html; then
         rm -f "$AWS_CONFIG_FILE"
+        echo "----------------------------------------------------------------"
+        echo "Upload Complete! Access your application via HTTP here:"
+        echo "http://${try(one(upcloud_managed_object_storage.frontend_store.endpoint).domain_name, "${var.object_storage_region}.upcloudobjects.com")}/${upcloud_managed_object_storage_bucket.frontend_bucket.name}/index.html"
+        echo "----------------------------------------------------------------"
       else
         rm -f "$AWS_CONFIG_FILE"
         exit 1
