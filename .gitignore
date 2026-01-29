@@ -14,3 +14,5 @@ crash.log
 
 # Sensitive files
 api-key.txt
+
+*.backup
