@@ -15,5 +15,7 @@
 ```json
 {
   "message": "Hello from UpCloud Kubernetes!",
+  "visit_count": 42,
   "status": "success"
 }
+```

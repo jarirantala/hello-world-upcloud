@@ -4,6 +4,12 @@ variable "upcloud_token" {
   sensitive   = true
 }
 
+variable "valkey_plan" {
+  description = "Plan for Managed Valkey database"
+  type        = string
+  default     = "1x1xCPU-2GB"
+}
+
 variable "region" {
   description = "UpCloud Region"
   type        = string

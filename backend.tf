@@ -27,7 +27,7 @@ resource "kubernetes_deployment" "backend" {
   wait_for_rollout = false
 
   spec {
-    replicas = 1
+    replicas                  = 1
     progress_deadline_seconds = 600
 
     selector {
@@ -49,11 +49,12 @@ resource "kubernetes_deployment" "backend" {
 
       spec {
         container {
-          image = var.container_image
+          image = "python:3.9-alpine"
           name  = "python-app"
-          
+
           # Use native Python server - starts instantly with zero dependencies!
-          command = ["python", "/app/app.py"]
+          # We add 'redis' library via pip to support Valkey
+          command = ["sh", "-c", "pip install redis && python /app/app.py"]
 
           port {
             container_port = 5000
@@ -62,6 +63,26 @@ resource "kubernetes_deployment" "backend" {
           env {
             name  = "FRONTEND_URL"
             value = "http://${element(concat([for e in upcloud_managed_object_storage.frontend_store.endpoint : e.domain_name], ["${upcloud_managed_object_storage.frontend_store.name}.upcloudobjects.com"]), 0)}"
+          }
+
+          env {
+            name  = "VALKEY_HOST"
+            value = upcloud_managed_database_valkey.valkey.service_host
+          }
+
+          env {
+            name  = "VALKEY_PORT"
+            value = upcloud_managed_database_valkey.valkey.service_port
+          }
+
+          env {
+            name  = "VALKEY_USER"
+            value = upcloud_managed_database_user.valkey_user.username
+          }
+
+          env {
+            name  = "VALKEY_PASSWORD"
+            value = upcloud_managed_database_user.valkey_user.password
           }
 
           resources {
@@ -95,7 +116,7 @@ resource "kubernetes_deployment" "backend" {
 # 3. Service (LoadBalancer)
 resource "kubernetes_service" "backend" {
   metadata {
-    name = "hello-service"
+    name = "hello-service-v2"
   }
   spec {
     selector = {

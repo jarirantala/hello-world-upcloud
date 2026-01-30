@@ -9,7 +9,7 @@ resource "upcloud_kubernetes_node_group" "group" {
   cluster    = upcloud_kubernetes_cluster.main.id
   node_count = 2
   name       = "worker-group"
-  plan       = "1xCPU-2GB"
+  plan       = "2xCPU-4GB"
 
   labels = {
     env = var.environment

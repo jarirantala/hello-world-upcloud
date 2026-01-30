@@ -5,6 +5,7 @@
 .
 ├── main.tf                 # UpCloud Provider, Network, Object Storage Service
 ├── kubernetes.tf           # UKS Cluster Definition
+├── database.tf             # Managed Valkey DB Definition
 ├── frontend.tf             # Bucket & HTML Upload
 ├── backend.tf              # Kubernetes Deployment & Service
 ├── variables.tf

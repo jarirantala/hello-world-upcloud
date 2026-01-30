@@ -15,6 +15,7 @@ The application is a "Hello World" web page. The static content (HTML/JS) is hos
 * **Backend:**
     * Python container running on UpCloud Managed Kubernetes (UKS).
     * Expose a public API endpoint via a Load Balancer.
+    * **Data Storage:** Scalable Valkey instance (managed service) for persistent greeting state or hit counters.
     * **CORS:** Must allow requests from the Object Storage domain.
 
 ## 4. Non-Functional Requirements
