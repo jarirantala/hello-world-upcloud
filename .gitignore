@@ -16,3 +16,6 @@ crash.log
 api-key.txt
 
 *.backup
+cluster_config.yaml
+kubectl
+tfplan*
