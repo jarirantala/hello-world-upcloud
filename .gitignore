@@ -19,3 +19,5 @@ api-key.txt
 cluster_config.yaml
 kubectl
 tfplan*
+
+.dist/

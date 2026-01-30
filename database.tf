@@ -19,4 +19,10 @@ resource "upcloud_managed_database_valkey" "valkey" {
 resource "upcloud_managed_database_user" "valkey_user" {
   service  = upcloud_managed_database_valkey.valkey.id
   username = "app_user"
+
+  valkey_access_control {
+    categories = ["+@all"]
+    channels   = ["*"]
+    keys       = ["*"]
+  }
 }

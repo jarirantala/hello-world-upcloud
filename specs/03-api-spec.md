@@ -14,8 +14,10 @@
 ### Response Body
 ```json
 {
-  "message": "Hello from UpCloud Kubernetes!",
-  "visit_count": 42,
+  "message": "Hello from UpCloud Kubernetes with Valkey!",
+  "greeting": "hello valkey",
+  "visit_count": 43,
+  "valkey_status": "Connected",
   "status": "success"
 }
 ```

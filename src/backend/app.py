@@ -18,7 +18,9 @@ try:
         username=VALKEY_USER,
         password=VALKEY_PASSWORD,
         decode_responses=True,
-        socket_timeout=5
+        socket_timeout=5,
+        ssl=True,
+        ssl_cert_reqs="none"
     )
     print(f"Connected to Valkey at {VALKEY_HOST}:{VALKEY_PORT}")
     # Initialize initial greeting if it doesn't exist (SETNX)
